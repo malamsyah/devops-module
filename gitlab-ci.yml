@@ -1,0 +1,35 @@
+image: "node:latest"
+
+stages:
+  - test
+  - build
+  - deploy
+
+test_app:
+  stage: test
+  script:
+    - yarn install
+    - CI=true yarn test
+
+build_app:
+  stage: build
+  script:
+    - yarn install
+    - yarn build
+  artifacts:
+    paths:
+      - build
+    expire_in: 1 day
+
+deploy_draft:
+  stage: deploy
+  script:
+    - yarn global add netlify-cli
+    - netlify deploy --site ${NETLIFY_SITE_ID} --auth ${NETLIFY_TOKEN} --dir build
+
+deploy_prod:
+  stage: deploy
+  script:
+    - yarn global add netlify-cli
+    - netlify deploy --site ${NETLIFY_SITE_ID} --auth ${NETLIFY_TOKEN} --dir build --prod
+  when: manual
